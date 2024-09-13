@@ -10,9 +10,25 @@ networks:
           gateway: 192.168.2.1
 
 services:
-  api-1:
+  database:
+    image: mysql:9
+    working_dir: /application/
+    volumes:
+      - type: bind
+        source: ./.database
+        target: /var/lib/mysql
+    networks:
+      internal:
+        ipv4_address: 192.168.2.6
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: "web"
+      MYSQL_ROOT_PASSWORD: "root"
+
+  web-1:
     image: node:22
-    hostname: api-1
+    hostname: web-1
     working_dir: /application/
     volumes:
       - type: bind
@@ -26,9 +42,9 @@ services:
       HOST: 192.168.2.2
       DATABASE_CONNECTION_STRING: mysql://root:root@192.168.2.6:3306/web
 
-  api-2:
+  web-2:
     image: node:22
-    hostname: api-2
+    hostname: web-2
     working_dir: /application/
     volumes:
       - type: bind
@@ -42,9 +58,9 @@ services:
       HOST: 192.168.2.3
       DATABASE_CONNECTION_STRING: mysql://root:root@192.168.2.6:3306/web
 
-  api-3:
+  web-3:
     image: node:22
-    hostname: api-3
+    hostname: web-3
     working_dir: /application/
     volumes:
       - type: bind
@@ -74,19 +90,3 @@ services:
       DATABASE_CONNECTION_STRING: mysql://root:root@192.168.2.6:3306/web
     ports:
       - "3000:3000"
-
-  database:
-    image: mysql:9
-    working_dir: /application/
-    volumes:
-      - type: bind
-        source: ./.database
-        target: /var/lib/mysql
-    networks:
-      internal:
-        ipv4_address: 192.168.2.6
-    ports:
-      - "3306:3306"
-    environment:
-      MYSQL_DATABASE: "web"
-      MYSQL_ROOT_PASSWORD: "root"
