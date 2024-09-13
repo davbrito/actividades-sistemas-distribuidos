@@ -1,4 +1,3 @@
-import { readFile } from "node:fs/promises";
 import { createScript } from "./script.js";
 
 const Script = await createScript(new URL("./dialog.js", import.meta.url));
