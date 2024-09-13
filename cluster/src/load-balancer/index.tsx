@@ -1,5 +1,7 @@
 import { serve } from "@hono/node-server";
-import { Hono } from "hono";
+import { getConnInfo } from "@hono/node-server/conninfo";
+import { Hono, HonoRequest } from "hono";
+import { logger } from "hono/logger";
 import { renderToStaticMarkup } from "react-dom/server";
 import Document from "../server/document.js";
 
@@ -11,6 +13,8 @@ const REGISTERED_SERVERS = (process.env.SERVERS || "")
   });
 
 const app = new Hono();
+
+app.use(logger());
 
 app.get("/info", async (c) => {
   const serverInfo = await fetchServersInfo();
@@ -38,16 +42,14 @@ app.get("/info", async (c) => {
 });
 
 let i = 0;
-app.all("/*", async (c) => {
-  const server = REGISTERED_SERVERS[i++ % REGISTERED_SERVERS.length];
-  const url = new URL(c.req.url);
-  url.hostname = server.hostname;
-  url.port = server.port;
-  const req = new Request(url, c.req.raw);
+app.use(async (c) => {
+  const server = getNextServer();
+  const req = replaceRequestHost(c.req, server);
+  const conninfo = getConnInfo(c);
 
-  console.log(
-    `redirigiendo peticion desde ${c.req.method}:${c.req.url} hacia ${req.method}:${req.url}`,
-  );
+  const selfAddress = `${conninfo.remote.address}:${conninfo.remote.port}${c.req.path}`;
+  const serverAddress = `${server.hostname}:${server.port}${c.req.path}`;
+  console.log(`redirigiendo peticion ${selfAddress} -> ${serverAddress}`);
 
   return await fetch(req);
 });
@@ -64,6 +66,20 @@ serve(
     );
   },
 );
+
+function replaceRequestHost(
+  req: HonoRequest,
+  server: (typeof REGISTERED_SERVERS)[0],
+) {
+  const url = new URL(req.url);
+  url.hostname = server.hostname;
+  url.port = server.port;
+  return new Request(url, req.raw);
+}
+
+function getNextServer() {
+  return REGISTERED_SERVERS[i++ % REGISTERED_SERVERS.length];
+}
 
 async function fetchServersInfo() {
   const infos = [];
