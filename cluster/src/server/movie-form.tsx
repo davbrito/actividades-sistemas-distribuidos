@@ -1,16 +1,29 @@
+import { useId } from "react";
 import { Movie } from "../database/movies.js";
 import DeleteDialog from "./delete-dialog.js";
 
 function MovieForm({ movie }: { movie?: Movie }) {
+  const formId = useId();
   return (
     <>
-      <div>
-        <h1>{movie ? "Editar" : "Agregar"} Película</h1>
-        <form action={movie ? `/movies/${movie.id}` : "/movies"} method="POST">
+      <article>
+        <header>
+          <h1>{movie ? "Editar" : "Agregar"} Película</h1>
+        </header>
+        <form
+          action={movie ? `/movies/${movie.id}` : "/movies"}
+          method="POST"
+          id={formId}
+        >
           <input type="hidden" name="_method" value={movie ? "PUT" : "POST"} />
           <label>
             Título
-            <input type="text" name="title" defaultValue={movie?.title} />
+            <input
+              type="text"
+              name="title"
+              defaultValue={movie?.title}
+              autoFocus
+            />
           </label>
           <label>
             Puntuación
@@ -38,7 +51,23 @@ function MovieForm({ movie }: { movie?: Movie }) {
             Opinión
             <textarea name="comments" defaultValue={movie?.comments} />
           </label>
-          <button type="submit">{movie ? "Actualizar" : "Agregar"}</button>
+        </form>
+        <footer
+          style={{
+            display: "flex",
+            justifyContent: "end",
+            alignItems: "center",
+            gap: "1rem",
+          }}
+        >
+          <a href="/movies">
+            {"\uFFE9 "}
+            Volver
+          </a>
+          <div style={{ flex: "1" }} />
+          <button type="submit" form={formId} style={{ width: "auto" }}>
+            {movie ? "Actualizar" : "Agregar"}
+          </button>
           {movie && (
             <button
               type="button"
@@ -46,20 +75,12 @@ function MovieForm({ movie }: { movie?: Movie }) {
               value={movie.id}
               className="secondary"
               data-delete-movie-id={movie.id}
-              style={{ width: "100%" }}
             >
               Borrar
             </button>
           )}
-          <p
-            style={{
-              textAlign: "center",
-            }}
-          >
-            <a href="/movies">Volver</a>
-          </p>
-        </form>
-      </div>
+        </footer>
+      </article>
       {movie && <DeleteDialog />}
     </>
   );
