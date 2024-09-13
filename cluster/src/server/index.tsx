@@ -72,9 +72,13 @@ app
   .get("/movies", async (c) => {
     c.status(200);
 
-    const movies = await c.var.db.getMovies();
+    const search = c.req.query("search")?.trim().toLowerCase();
 
-    return c.html(renderHtml(<MovieList movies={movies} />, c.req.path));
+    const movies = await c.var.db.getMovies({ search });
+
+    return c.html(
+      renderHtml(<MovieList movies={movies} search={search} />, c.req.path),
+    );
   })
   .post(async (c, next) => {
     const formData = await c.req.formData();

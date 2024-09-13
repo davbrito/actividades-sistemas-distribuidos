@@ -20,7 +20,8 @@ const createDb = () => {
   };
 
   return {
-    getMovies: async () => movies.getMovies(await getConn()),
+    getMovies: async (ops: movies.GetMoviesOptions) =>
+      movies.getMovies(await getConn(), ops),
     getMovie: async (id: number) => movies.getMovie(await getConn(), id),
     insertMovie: async (movie: movies.MovieInput) =>
       movies.insertMovie(await getConn(), movie),

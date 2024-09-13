@@ -31,7 +31,19 @@ export async function insertMovie(connection: Connection, movie: MovieInput) {
   return result.insertId;
 }
 
-export async function getMovies(connection: Connection) {
+export interface GetMoviesOptions {
+  search?: string;
+}
+
+export async function getMovies(connection: Connection, ops: GetMoviesOptions) {
+  if (ops.search) {
+    const [rows] = await connection.query(
+      "SELECT * FROM Movies WHERE title LIKE ?",
+      [`%${ops.search}%`],
+    );
+    return rows as Movie[];
+  }
+
   const [rows] = await connection.query("SELECT * FROM Movies");
   return rows as Movie[];
 }
