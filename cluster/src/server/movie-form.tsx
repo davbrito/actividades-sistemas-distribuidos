@@ -41,7 +41,7 @@ function MovieForm({ movie }: { movie?: Movie }) {
                 min="1"
                 max="5"
                 step="1"
-                defaultValue={movie?.rating ?? 3}
+                defaultValue={movie?.rating ?? 5}
                 style={{ margin: "0" }}
               />
               <div>⭐</div>
