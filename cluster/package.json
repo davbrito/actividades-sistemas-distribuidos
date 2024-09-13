@@ -8,7 +8,8 @@
     "stop": "docker compose down",
     "server": "tsx watch src/server/index.tsx",
     "load-balancer": "tsx watch src/load-balancer/index.tsx",
-    "db": "docker compose exec database mysql web -p -u root"
+    "db:admin": "docker compose exec database mysql web -p -u root",
+    "db:init": "tsx src/database/init.ts"
   },
   "keywords": [],
   "author": "",
