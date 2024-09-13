@@ -1,3 +1,5 @@
+import ThemeButton from "./theme-button.js";
+
 function Document({
   children,
   title,
@@ -59,6 +61,9 @@ function Document({
                 >
                   Info
                 </a>
+              </li>
+              <li>
+                <ThemeButton />
               </li>
             </ul>
           </nav>

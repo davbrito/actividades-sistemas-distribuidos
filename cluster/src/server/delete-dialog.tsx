@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
+import { createScript } from "./script.js";
 
-const script = await readFile(new URL("./dialog.js", import.meta.url), "utf8");
+const Script = await createScript(new URL("./dialog.js", import.meta.url));
 
 function DeleteDialog() {
   return (
@@ -45,12 +46,7 @@ function DeleteDialog() {
       >
         <input type="hidden" name="_method" value="DELETE" />
       </form>
-      <script
-        type="module"
-        dangerouslySetInnerHTML={{
-          __html: script,
-        }}
-      />
+      <Script />
     </>
   );
 }
