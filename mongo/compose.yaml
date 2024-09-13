@@ -1,0 +1,53 @@
+name: mongo-replicas
+
+networks:
+  mongodb:
+    driver: bridge
+
+    ipam:
+      config:
+        - subnet: 192.168.0.0/24
+          gateway: 192.168.0.1
+
+volumes:
+  mongodb-1-data:
+  mongodb-2-data:
+  mongodb-3-data:
+  mongodb-1-config:
+  mongodb-2-config:
+  mongodb-3-config:
+
+services:
+  mongodb-1:
+    image: mongodb/mongodb-community-server:7.0.12-ubuntu2204
+    hostname: mongodb-1
+    networks:
+      mongodb:
+        ipv4_address: 192.168.0.2
+    volumes: [mongodb-1-data:/data/db, mongodb-1-config:/data/configdb]
+
+    ports:
+      - 27017:27017
+    command: mongod --replSet rs0 --bind_ip localhost,mongodb-1
+
+  mongodb-2:
+    image: mongodb/mongodb-community-server:7.0.12-ubuntu2204
+    hostname: mongodb-2
+    networks:
+      mongodb:
+        ipv4_address: 192.168.0.3
+    volumes: [mongodb-2-data:/data/db, mongodb-2-config:/data/configdb]
+    ports:
+      - 27018:27017
+    command: mongod --replSet rs0 --bind_ip localhost,mongodb-2
+
+  mongodb-3:
+    image: mongodb/mongodb-community-server:7.0.12-ubuntu2204
+    hostname: mongodb-3
+    networks:
+      mongodb:
+        ipv4_address: 192.168.0.4
+    volumes: [mongodb-3-data:/data/db, mongodb-3-config:/data/configdb]
+    ports:
+      - 27019:27017
+    command: mongod --replSet rs0 --bind_ip localhost,mongodb-3
