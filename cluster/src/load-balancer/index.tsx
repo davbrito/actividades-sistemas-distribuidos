@@ -1,6 +1,7 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { renderToStaticMarkup } from "react-dom/server";
+import Document from "../server/document.js";
 
 const REGISTERED_SERVERS = (process.env.SERVERS || "")
   .split(",")
@@ -17,41 +18,38 @@ app.get("/info", async (c) => {
   return c.html(
     "<!DOCTYPE html>" +
       renderToStaticMarkup(
-        <html>
-          <head>
-            <meta charSet="utf-8" />
-            <title>Info</title>
-          </head>
-          <body>
-            <div id="app">
-              <div>
-                <h1>Información de servidores</h1>
-                <ul>
-                  {serverInfo.map((server) => {
-                    return (
-                      <li key={server.url}>
-                        <strong>{server.url}</strong>: Se ha usado{" "}
-                        {server.count} veces
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            </div>
-          </body>
-        </html>
-      )
+        <Document title="Info" pathname={c.req.path}>
+          <div>
+            <h1>Información de servidores</h1>
+            <ul>
+              {serverInfo.map((server) => {
+                return (
+                  <li key={server.url}>
+                    <strong>{server.url}</strong>: Se ha usado {server.count}{" "}
+                    veces
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </Document>,
+      ),
   );
 });
 
 let i = 0;
-app.all("/*", (request) => {
+app.all("/*", async (c) => {
   const server = REGISTERED_SERVERS[i++ % REGISTERED_SERVERS.length];
-  console.log(`proxying request to ${server.hostname}:${server.port}`);
-  const url = new URL(request.req.url);
+  const url = new URL(c.req.url);
   url.hostname = server.hostname;
   url.port = server.port;
-  return fetch(url, request.req);
+  const req = new Request(url, c.req.raw);
+
+  console.log(
+    `redirigiendo peticion desde ${c.req.method}:${c.req.url} hacia ${req.method}:${req.url}`,
+  );
+
+  return await fetch(req);
 });
 
 serve(
@@ -62,9 +60,9 @@ serve(
   },
   (address) => {
     console.log(
-      `load balancer listening on ${address.address}:${address.port}`
+      `load balancer listening on ${address.address}:${address.port}`,
     );
-  }
+  },
 );
 
 async function fetchServersInfo() {

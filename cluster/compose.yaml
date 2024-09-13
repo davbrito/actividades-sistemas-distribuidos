@@ -24,7 +24,7 @@ services:
     command: ["npm", "run", "server"]
     environment:
       HOST: 192.168.2.2
-      DATABASE_URL: http://192.168.2.6:3000
+      DATABASE_CONNECTION_STRING: mysql://root:root@192.168.2.6:3306/web
 
   api-2:
     image: node:22
@@ -40,7 +40,7 @@ services:
     command: ["npm", "run", "server"]
     environment:
       HOST: 192.168.2.3
-      DATABASE_URL: http://192.168.2.6:3000
+      DATABASE_CONNECTION_STRING: mysql://root:root@192.168.2.6:3306/web
 
   api-3:
     image: node:22
@@ -56,7 +56,7 @@ services:
     command: ["npm", "run", "server"]
     environment:
       HOST: 192.168.2.4
-      DATABASE_URL: http://192.168.2.6:3000
+      DATABASE_CONNECTION_STRING: mysql://root:root@192.168.2.6:3306/web
 
   load-balancer:
     image: node:22
@@ -71,27 +71,22 @@ services:
     command: ["npm", "run", "load-balancer"]
     environment:
       SERVERS: "192.168.2.2:3000,192.168.2.3:3000,192.168.2.4:3000"
-      DATABASE_URL: http://192.168.2.6:3000
+      DATABASE_CONNECTION_STRING: mysql://root:root@192.168.2.6:3306/web
     ports:
       - "3000:3000"
 
   database:
-    image: node:22
+    image: mysql:9
     working_dir: /application/
     volumes:
       - type: bind
-        source: ./
-        target: /application/
+        source: ./.database
+        target: /var/lib/mysql
     networks:
       internal:
         ipv4_address: 192.168.2.6
-    command:
-      [
-        "npx",
-        "json-server",
-        "./public/db.json",
-        "--host",
-        "192.168.2.6",
-        "--port",
-        "3000",
-      ]
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: "web"
+      MYSQL_ROOT_PASSWORD: "root"
