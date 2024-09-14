@@ -15,8 +15,11 @@ services:
     working_dir: /application/
     volumes:
       - type: bind
-        source: ./.database
+        source: ./.database/data
         target: /var/lib/mysql
+      - type: bind
+        source: ./.database/config
+        target: /etc/mysql/conf.d
     networks:
       internal:
         ipv4_address: 192.168.2.6

@@ -9,8 +9,8 @@ const connection = await mysql.createConnection({
   database: "web",
 });
 
-const result = await createTable(connection);
-
-console.log(result);
-
-await connection.end();
+try {
+  await createTable(connection);
+} finally {
+  await connection.end();
+}

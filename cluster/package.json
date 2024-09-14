@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "start": "docker compose up",
+    "start": "mkdir -p .database/data .database/config && docker compose up",
     "stop": "docker compose down",
     "server": "tsx watch src/server/index.tsx",
     "load-balancer": "tsx watch src/load-balancer/index.tsx",

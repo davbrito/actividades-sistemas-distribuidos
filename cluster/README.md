@@ -51,10 +51,10 @@ Sigue los siguientes pasos para ejecutar la aplicación en tu entorno local:
 
 2. **Crea el directorio de datos de MySQL:**
 
-   Crea un directorio llamado `.database` en la raíz del proyecto para almacenar los datos de la base de datos MySQL:
+   Crea un directorio llamado `.database/data` en la raíz del proyecto para almacenar los datos de la base de datos MySQL:
 
    ```bash
-    mkdir .database
+    mkdir -p .database/data
    ```
 
 3. **Construye y ejecuta los contenedores:**
@@ -82,3 +82,19 @@ Sigue los siguientes pasos para ejecutar la aplicación en tu entorno local:
 6. **Opcional:** Consultar el estado del balanceador de carga:
 
    Puedes ver cuántas peticiones ha gestionado cada servidor en la siguiente URL: [http://localhost:3000/info](http://localhost:3000/info)
+
+7. **Opcional:** Ingresa a la base de datos MySQL en la terminal:
+
+   Para acceder a la base de datos MySQL desde la terminal, ejecuta el siguiente comando:
+
+   ```bash
+   npm run db:admin
+   ```
+
+8. **Opcional:** Detener y limpiar los contenedores:
+
+   Para detener y eliminar los contenedores de Docker, ejecuta el siguiente comando:
+
+   ```bash
+   docker-compose down
+   ```
