@@ -1,22 +1,16 @@
 import { serve } from "@hono/node-server";
 import { getConnInfo } from "@hono/node-server/conninfo";
-import { Hono, HonoRequest } from "hono";
+import { Hono } from "hono";
 import { logger } from "hono/logger";
 import { renderToStaticMarkup } from "react-dom/server";
 import Document from "../server/document.js";
-import { Client, Dispatcher, HeadersInit, Request } from "undici";
-import { mean, sum } from "lodash-es";
 
 const REGISTERED_SERVERS = (process.env.SERVERS || "")
   .split(",")
   .map((server) => {
     const [hostname, port] = server.split(":");
     const url = `http://${server}`;
-    const client = new Client(url, {
-      keepAliveTimeout: 10,
-      keepAliveMaxTimeout: 10,
-    });
-    return { hostname, port, url, client };
+    return { hostname, port, url };
   });
 
 type ServerInfo = (typeof REGISTERED_SERVERS)[0];
@@ -90,12 +84,9 @@ async function getNextServer() {
 async function isOk(server: ServerInfo) {
   try {
     console.log(`checking server ${server.url}`);
-    const res = await server.client.request({
-      method: "GET",
-      path: "/heartbeat",
-    });
+    const res = await fetch(`${server.url}/heartbeat`);
 
-    return res.statusCode === 200;
+    return res.status === 200;
   } catch (e) {
     console.error(e);
     return false;
@@ -106,13 +97,8 @@ async function fetchServersInfo() {
   const infos = [];
 
   for (const server of REGISTERED_SERVERS) {
-    const info = server.client
-      .request({
-        method: "GET",
-        path: "/serverinfo",
-        throwOnError: true,
-      })
-      .then((r) => r.body.json())
+    const info = fetch(server.url + "/serverinfo")
+      .then((r) => r.json())
       .then((d: any) => ({ ...d, ...server }));
     infos.push(info);
   }
@@ -120,18 +106,10 @@ async function fetchServersInfo() {
   return Promise.all(infos);
 }
 
-async function proxy(request: Request, server: ServerInfo) {
-  const url = new URL(request.url);
+async function proxy(req: Request, server: ServerInfo) {
+  const url = new URL(req.url);
+  url.hostname = server.hostname;
+  url.port = server.port;
 
-  const res = await server.client.request({
-    method: request.method as Dispatcher.HttpMethod,
-    path: url.pathname + url.search,
-    headers: request.headers,
-    body: request.body as any,
-  });
-
-  return new Response(res.body, {
-    status: res.statusCode,
-    headers: res.headers as HeadersInit,
-  });
+  return await fetch(url, req);
 }
