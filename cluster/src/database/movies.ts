@@ -26,8 +26,6 @@ export async function insertMovie(connection: Connection, movie: MovieInput) {
     [movie.title, movie.comments, movie.rating],
   );
 
-  console.log("insertMovie", result);
-
   return result.insertId;
 }
 
@@ -53,7 +51,6 @@ export async function getMovie(connection: Connection, id: number) {
     "SELECT * FROM Movies WHERE id = ?",
     [id],
   );
-  console.log("getMovie", id, rows);
   return rows[0] as Movie;
 }
 

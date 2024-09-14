@@ -1,3 +1,4 @@
+/// <reference path="../env.d.ts" />
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { logger } from "hono/logger";
@@ -11,6 +12,17 @@ import MovieList from "./movie-list.js";
 const app = new Hono().use(logger()).use(db);
 
 let handleCount = 0;
+
+app.use(async (c, next) => {
+  return await next();
+});
+
+app.get("/heartbeat", () => {
+  return new Response(null, {
+    status: 200,
+    headers: { "Cache-Control": "no-store" },
+  });
+});
 
 app.get("/serverinfo", (c) => {
   return c.json({ count: handleCount });
@@ -117,7 +129,7 @@ app.get("/", async (c) => {
   );
 });
 
-serve(
+const server = serve(
   {
     fetch: app.fetch,
     port: PORT,
@@ -134,3 +146,17 @@ function renderHtml(node: React.ReactNode, pathname: string) {
     renderToStaticMarkup(<Document pathname={pathname}>{node}</Document>)
   );
 }
+
+const shutdownServer = async () => {
+  server.close((err) => {
+    if (err) {
+      console.error("error closing server", err);
+      process.exit(1);
+    }
+    console.log("server closed");
+    process.exit(0);
+  });
+};
+
+process.on("SIGTERM", shutdownServer);
+process.on("SIGINT", shutdownServer);

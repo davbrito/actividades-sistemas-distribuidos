@@ -7,3 +7,9 @@ export async function createScript(url: string | URL) {
     return <script type="module" dangerouslySetInnerHTML={{ __html: file }} />;
   };
 }
+
+export function Script({ children }: { children: string }) {
+  return (
+    <script type="module" dangerouslySetInnerHTML={{ __html: children }} />
+  );
+}
