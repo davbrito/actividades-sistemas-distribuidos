@@ -1,4 +1,3 @@
-import { css } from "hono/css";
 import { createScript } from "./script.js";
 
 const Script = await createScript(

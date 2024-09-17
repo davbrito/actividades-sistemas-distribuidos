@@ -2,8 +2,7 @@ import { serve } from "@hono/node-server";
 import { getConnInfo } from "@hono/node-server/conninfo";
 import { Hono } from "hono";
 import { logger } from "hono/logger";
-import { renderToStaticMarkup } from "react-dom/server";
-import Document from "../server/document.js";
+import { renderDocument } from "../page/index.js";
 
 const REGISTERED_SERVERS = (process.env.SERVERS || "")
   .split(",")
@@ -23,24 +22,21 @@ app.get("/info", async (c) => {
   const serverInfo = await fetchServersInfo();
 
   return c.html(
-    "<!DOCTYPE html>" +
-      renderToStaticMarkup(
-        <Document title="Info" pathname={c.req.path}>
-          <div>
-            <h1>Información de servidores</h1>
-            <ul>
-              {serverInfo.map((server) => {
-                return (
-                  <li key={server.url}>
-                    <strong>{server.url}</strong>: Se ha usado {server.count}{" "}
-                    veces
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        </Document>,
-      ),
+    renderDocument(
+      <div>
+        <h1>Información de servidores</h1>
+        <ul>
+          {serverInfo.map((server) => {
+            return (
+              <li key={server.url}>
+                <strong>{server.url}</strong>: Se ha usado {server.count} veces
+              </li>
+            );
+          })}
+        </ul>
+      </div>,
+      { title: "Info", pathname: c.req.path },
+    ),
   );
 });
 

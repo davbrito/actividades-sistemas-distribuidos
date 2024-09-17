@@ -1,12 +1,11 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { logger } from "hono/logger";
-import { renderToStaticMarkup } from "react-dom/server";
 import { db } from "../database/middleware.js";
+import { renderDocument } from "../page/index.js";
+import MovieForm from "../page/movie-form.js";
+import MovieList from "../page/movie-list.js";
 import { HOST, PORT } from "./config.js";
-import Document from "./document.js";
-import MovieForm from "./movie-form.js";
-import MovieList from "./movie-list.js";
 
 const app = new Hono().use(logger()).use(db);
 
@@ -38,7 +37,7 @@ app.use(async (c, next) => {
 app.get("/movies/new", (c) => {
   c.status(200);
 
-  return c.html(renderHtml(<MovieForm />, c.req.path));
+  return c.html(renderDocument(<MovieForm />, { pathname: c.req.path }));
 });
 
 app
@@ -50,11 +49,15 @@ app
     if (!movie) {
       c.status(404);
 
-      return c.html(renderHtml(<h2>Movie not found</h2>, c.req.path));
+      return c.html(
+        renderDocument(<h2>Movie not found</h2>, { pathname: c.req.path }),
+      );
     }
 
     c.status(200);
-    return c.html(renderHtml(<MovieForm movie={movie} />, c.req.path));
+    return c.html(
+      renderDocument(<MovieForm movie={movie} />, { pathname: c.req.path }),
+    );
   })
   .post(async (c, next) => {
     const formData = await c.req.formData();
@@ -88,7 +91,9 @@ app
     const movies = await c.var.db.getMovies({ search });
 
     return c.html(
-      renderHtml(<MovieList movies={movies} search={search} />, c.req.path),
+      renderDocument(<MovieList movies={movies} search={search} />, {
+        pathname: c.req.path,
+      }),
     );
   })
   .post(async (c, next) => {
@@ -118,12 +123,12 @@ app.get("/", async (c) => {
   c.status(200);
 
   return c.html(
-    renderHtml(
+    renderDocument(
       <div>
         <div>Respondiendo desde servidor: {HOST}</div>
         <div>El servidor ha respondido {handleCount} veces</div>
       </div>,
-      c.req.path,
+      { pathname: c.req.path },
     ),
   );
 });
@@ -138,13 +143,6 @@ const server = serve(
     console.log(`server listening on ${address.address}:${address.port}`);
   },
 );
-
-function renderHtml(node: React.ReactNode, pathname: string) {
-  return (
-    "<!DOCTYPE html>" +
-    renderToStaticMarkup(<Document pathname={pathname}>{node}</Document>)
-  );
-}
 
 const shutdownServer = async () => {
   server.close((err) => {
