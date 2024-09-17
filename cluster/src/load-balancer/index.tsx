@@ -111,5 +111,18 @@ async function proxy(req: Request, server: ServerInfo) {
   url.hostname = server.hostname;
   url.port = server.port;
 
-  return await fetch(url, req);
+  return await fetch(url, {
+    method: req.method,
+    headers: req.headers,
+    body: req.body,
+    duplex: req.duplex,
+    credentials: req.credentials,
+    integrity: req.integrity,
+    redirect: req.redirect,
+    referrer: req.referrer,
+    referrerPolicy: req.referrerPolicy,
+    keepalive: req.keepalive,
+    signal: req.signal,
+    mode: req.mode,
+  });
 }

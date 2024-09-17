@@ -62,7 +62,7 @@ Sigue los siguientes pasos para ejecutar la aplicación en tu entorno local:
    Utiliza Docker Compose para levantar la infraestructura de la aplicación:
 
    ```bash
-   docker-compose up
+   docker compose up
    ```
 
    Esto iniciará los contenedores de los servidores web y el balanceador de carga, así como el contenedor de la base de datos MySQL.
